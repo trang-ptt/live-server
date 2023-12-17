@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+  email               String      @unique
+  username            String      @unique
+  password            String
+  name                String?
+  accessFailedCount   Int         @default(0)
+  ava                 String?
+  bio                 String?
+  socketId            String?
+  usernameLastChanged DateTime    @default(now())
+  accountType         AccountType @default(USER)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  liveRooms           LiveRoom[]
+  Live                Live[]
+}
+
+enum AccountType {
+  ADMIN
+  USER
+  BUSINESS
+}
+
+model Live {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  liveRoomId   String?   @db.ObjectId
+  liveRoom     LiveRoom? @relation(fields: [liveRoomId], references: [id])
+  user         User?     @relation(fields: [userId], references: [id])
+  userId       String?   @db.ObjectId
+  trackVideo   Int?
+  trackAudio   Int?
+  srsServerId  String?
+  srsServiceId String?
+  srsAction    String?
+  srsClientId  String?
+  srsIp        String?
+  srsVhost     String?
+  srsApp       String?
+  srsTcUrl     String?
+  srsStream    String?
+  srsParam     String?
+  srsStreamUrl String?
+  srsStreamId  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime
+}
+
+model LiveRoom {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?
+  status    LiveRoomStatus?
+  isShow    Boolean?
+  rmtpUrl   String?
+  flvUrl    String?
+  hlsUrl    String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  deletedAt DateTime
+  user      User            @relation(fields: [userId], references: [id])
+  userId    String          @db.ObjectId
+  Live      Live[]
+}
+
+enum LiveRoomStatus {
+  NORMAL
+  DISABLE
+}
