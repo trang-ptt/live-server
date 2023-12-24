@@ -1,23 +1,12 @@
-import {
-  Body,
-  Controller,
-  ForbiddenException,
-  Get,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { SRS_CONFIG } from 'src/config/secret';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { getIpAddress } from 'src/utils';
 import { GetUser } from '../auth/decorator';
 import { JwtGuard } from '../auth/guard';
-import { LiveRoomService } from '../live-room/live-room.service';
 import { myaxios } from './../../utils/request';
-import { LiveService } from './../live/live.service';
-import { GetStreamQuery, SrsCbDTO, SrsRTCBodyDTO } from './dto';
+import { GetStreamQuery, SrsClientDTO, SrsRTCBodyDTO } from './dto';
 import { SrsService } from './srs.service';
 
 @ApiTags('SRS')
@@ -25,14 +14,9 @@ import { SrsService } from './srs.service';
 @UseGuards(JwtGuard)
 @Controller('srs')
 export class SrsController {
-  constructor(
-    private srsService: SrsService,
-    private liveRoomService: LiveRoomService,
-    private liveService: LiveService,
-    private prisma: PrismaService,
-  ) {}
+  constructor(private srsService: SrsService) {}
 
-  @Post('rtcV1Publish')
+  // @Post('rtcV1Publish')
   async rtcV1Publish(@Body() rtcData: SrsRTCBodyDTO) {
     const { api, clientip, sdp, streamurl, tid } = rtcData;
     const ipAddresses = getIpAddress();
@@ -51,7 +35,7 @@ export class SrsController {
     }
   }
 
-  @Post('rtcV1Play')
+  // @Post('rtcV1Play')
   async rtcV1Play(@Body() rtcData: SrsRTCBodyDTO) {
     const { api, clientip, sdp, streamurl, tid } = rtcData;
     const ipAddresses = getIpAddress();
@@ -77,6 +61,9 @@ export class SrsController {
     return res;
   }
 
+  @ApiOperation({
+    summary: 'Get clients info',
+  })
   @Get('apiV1Clients')
   async getApiV1Clients(@Query() query: GetStreamQuery) {
     const { start, count } = query;
@@ -84,62 +71,55 @@ export class SrsController {
     return res;
   }
 
+  @ApiOperation({
+    summary: 'Publish live room',
+  })
   @Post('onPublish')
-  async onPublish(@GetUser() user: User, @Body() dto: SrsCbDTO) {
+  async onPublish(@GetUser() user: User, @Body() dto: SrsClientDTO) {
     try {
-      const roomId = dto.stream.replace(/\.(m3u8|flv)$/g, '');
-
-      const isLive = await this.liveService.findByRoomId(roomId);
-      if (isLive.length > 0) {
-        throw new ForbiddenException('Cannot publish, room is living');
-      }
-
-      const liveRoom = await this.liveRoomService.find(roomId);
-      if (!liveRoom) throw new ForbiddenException('Room not exist');
-
-      const newLive = await this.prisma.live.create({
-        data: {
-          liveRoomId: roomId,
-          userId: user.id,
-          trackAudio: 1,
-          trackVideo: 1,
-          srsAction: dto.action,
-          srsApp: dto.app,
-          srsClientId: dto.clientId,
-          srsIp: dto.ip,
-          srsParam: dto.param,
-          srsServerId: dto.serverId,
-          srsStream: dto.stream,
-          srsStreamId: dto.streamId,
-          srsStreamUrl: dto.streamUrl,
-          srsTcUrl: dto.tcUrl,
-          srsVhost: dto.vhost,
-          deletedAt: null,
-        },
-      });
-      return newLive;
+      await this.srsService.onPublish(user, dto);
     } catch (error) {
       throw error;
     }
   }
 
+  @ApiOperation({
+    summary: 'Unpublish live room',
+  })
   @Post('onUnpublish')
-  async onUnpublish(@GetUser() user: User, @Body() dto: SrsCbDTO) {
+  async onUnpublish(
+    @GetUser() user: User,
+    @Query('liveRoomId') roomId: string,
+  ) {
     try {
-      const roomId = dto.stream.replace(/\.(m3u8|flv)$/g, '');
+      const res = await this.srsService.onUnpublish(user, roomId);
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
 
-      const isLive = await this.liveService.findByRoomId(roomId);
-      if (isLive.length > 0) {
-        throw new ForbiddenException('Cannot publish, room is living');
-      }
+  @ApiOperation({
+    summary: 'Join live room',
+  })
+  @Post('onPlay')
+  async onPlay(@GetUser() user: User, @Body() dto: SrsClientDTO) {
+    try {
+      const res = await this.srsService.onPlay(user, dto);
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
 
-      const liveRoom = await this.liveRoomService.find(roomId);
-      if (!liveRoom) throw new ForbiddenException('Room not exist');
-
-      await this.liveService.deleteLiveByRoomId(roomId);
-      return {
-        code: 'SUCCESS',
-      };
+  @ApiOperation({
+    summary: 'Leave live room',
+  })
+  @Post('onStop')
+  async onStop(@GetUser() user: User, @Query('liveRoomId') roomId: string) {
+    try {
+      const res = await this.srsService.onStop(user, roomId);
+      return res;
     } catch (error) {
       throw error;
     }

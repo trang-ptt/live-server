@@ -2,13 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
 export class GetStreamQuery {
-  @ApiProperty()
+  @ApiProperty({
+    required: false,
+  })
   @Transform(({ value }) => {
     return parseInt(value);
   })
   start: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    required: false,
+  })
   @Transform(({ value }) => {
     return parseInt(value);
   })
@@ -18,13 +22,13 @@ export class GetStreamQuery {
 export class SrsRTCBodyDTO {
   @ApiProperty()
   api: string;
-  
+
   @ApiProperty()
   clientip: any;
-  
+
   @ApiProperty()
   sdp: string;
-  
+
   @ApiProperty()
   streamurl: string;
 
@@ -32,29 +36,9 @@ export class SrsRTCBodyDTO {
   tid: string;
 }
 
-export class SrsCbDTO {
+export class SrsClientDTO {
   @ApiProperty()
-  serverId: string;
-  @ApiProperty()
-  serviceId: string;
-  @ApiProperty()
-  action: string;
+  liveRoomId: string;
   @ApiProperty()
   clientId: string;
-  @ApiProperty()
-  ip: string;
-  @ApiProperty()
-  vhost: string;
-  @ApiProperty()
-  app: string;
-  @ApiProperty()
-  tcUrl: string;
-  @ApiProperty()
-  stream: string;
-  @ApiProperty()
-  param: string;
-  @ApiProperty()
-  streamUrl: string;
-  @ApiProperty()
-  streamId: string;
 }

@@ -1,26 +1,35 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { JwtGuard } from './../auth/guard/jwt.guard';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { LiveService } from './live.service';
 
+@ApiTags('User Live')
+@ApiBearerAuth()
+@UseGuards(JwtGuard)
 @Controller('live')
 export class LiveController {
   constructor(private liveService: LiveService) {}
-  @Get('list')
-  getList() {
-    const result = this.liveService.getList();
+
+  @ApiOperation({
+    summary: 'Get list user in live room',
+  })
+  @Get(':liveRoomId/userList')
+  getList(@Param('liveRoomId') roomId: string) {
+    const result = this.liveService.getList(roomId);
     return result;
   }
 
-  @Post('close_live')
-  async closeLive(@GetUser() user: User) {
-    const result = await this.closeLive(user);
-    return result;
-  }
-
-  @Get('is_live')
-  async isLive(@GetUser() user: User) {
-    const result = await this.liveService.isLive(user);
+  @ApiOperation({
+    summary: 'Check if you in room',
+  })
+  @Get(':liveRoomId/user')
+  async userInRoom(
+    @GetUser() user: User,
+    @Param('liveRoomId') liveRoomId: string,
+  ) {
+    const result = await this.liveService.findUserInRoom(user, liveRoomId);
     return result;
   }
 }

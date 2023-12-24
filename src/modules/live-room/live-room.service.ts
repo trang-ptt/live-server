@@ -17,7 +17,7 @@ export class LiveRoomService {
         name: true,
         isShow: true,
         flvUrl: true,
-        rmtpUrl: true,
+        pushUrl: true,
         hlsUrl: true,
         createdAt: true,
         user: {
@@ -42,7 +42,7 @@ export class LiveRoomService {
         name: true,
         isShow: true,
         flvUrl: true,
-        rmtpUrl: true,
+        pushUrl: true,
         hlsUrl: true,
         createdAt: true,
         user: {
@@ -80,19 +80,19 @@ export class LiveRoomService {
     });
 
     const liveUrl = (live_room_id: string) => ({
-      rmtpUrl: `${SERVER_LIVE.PushDomain}/live/${SERVER_LIVE.AppName}/${live_room_id}`,
+      pushUrl: `${SERVER_LIVE.PushDomain}/live/${SERVER_LIVE.AppName}/${live_room_id}`,
       flvUrl: `${SERVER_LIVE.PullDomain}/live/${SERVER_LIVE.AppName}/${live_room_id}.flv`,
       hlsUrl: `${SERVER_LIVE.PullDomain}/live/${SERVER_LIVE.AppName}/${live_room_id}.m3u8`,
     });
 
-    const { rmtpUrl, flvUrl, hlsUrl } = liveUrl(liveRoom.id);
+    const { pushUrl, flvUrl, hlsUrl } = liveUrl(liveRoom.id);
 
     const updateLiveRoom = await this.prisma.liveRoom.update({
       where: {
         id: liveRoom.id,
       },
       data: {
-        rmtpUrl,
+        pushUrl,
         flvUrl,
         hlsUrl,
       },

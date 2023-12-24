@@ -1,31 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SrsService } from '../srs/srs.service';
 
 @Injectable()
 export class LiveService {
-  constructor(private prisma: PrismaService, private srsService: SrsService) {}
+  constructor(private prisma: PrismaService) {}
 
-  async getList() {
+  async getList(roomId: string) {
     const result = await this.prisma.live.findMany({
       where: {
         deletedAt: null,
+        liveRoomId: roomId,
       },
       select: {
-        trackVideo: true,
-        trackAudio: true,
-        srsServerId: true,
-        srsServiceId: true,
-        srsAction: true,
-        srsIp: true,
-        srsVhost: true,
-        srsApp: true,
-        srsTcUrl: true,
-        srsStream: true,
-        srsParam: true,
-        srsStreamUrl: true,
-        srsStreamId: true,
+        srsClientId: true,
+        publish: true,
         createdAt: true,
         user: {
           select: {
@@ -59,17 +48,14 @@ export class LiveService {
     return result;
   }
 
-  async closeLive(user: User) {
-    const room = await this.findByUserId(user.id);
-    if (!room) throw new BadRequestException('No live room found');
-    const live = await this.findByRoomId(room.id);
-    live.forEach((item) => {
-      this.srsService.common.deleteApiV1Clients(item.srsClientId);
+  async findPublishLiveByRoomId(id: string) {
+    const result = await this.prisma.live.findFirst({
+      where: {
+        liveRoomId: id,
+        publish: true,
+      },
     });
-    await this.deleteLiveByRoomId(room.id);
-    return {
-      code: 'SUCCESS',
-    };
+    return result;
   }
 
   async deleteLiveByRoomId(id: string) {
@@ -87,10 +73,19 @@ export class LiveService {
     ]);
   }
 
-  async isLive(user: User) {
-    const room = await this.findByUserId(user.id);
+  async findUserInRoom(user: User, roomId: string) {
+    const room = await this.prisma.liveRoom.findUnique({
+      where: {
+        id: roomId,
+      },
+    });
     if (!room) throw new BadRequestException('No live room found');
-    const live = await this.findByRoomId(room.id);
-    return live
+    const live = await this.prisma.live.findFirst({
+      where: {
+        liveRoomId: roomId,
+        userId: user.id,
+      },
+    });
+    return live;
   }
 }

@@ -10,7 +10,6 @@ import { LiveRoomModule } from './modules/live-room/live-room.module';
 
 @Module({
   imports: [
-    LiveModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -18,6 +17,7 @@ import { LiveRoomModule } from './modules/live-room/live-room.module';
     PrismaModule,
     SrsModule,
     LiveRoomModule,
+    LiveModule,
   ],
   controllers: [AppController],
   providers: [AppService],

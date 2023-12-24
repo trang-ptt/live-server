@@ -40,20 +40,8 @@ model Live {
   liveRoom     LiveRoom? @relation(fields: [liveRoomId], references: [id])
   user         User?     @relation(fields: [userId], references: [id])
   userId       String?   @db.ObjectId
-  trackVideo   Int?
-  trackAudio   Int?
-  srsServerId  String?
-  srsServiceId String?
-  srsAction    String?
   srsClientId  String?
-  srsIp        String?
-  srsVhost     String?
-  srsApp       String?
-  srsTcUrl     String?
-  srsStream    String?
-  srsParam     String?
-  srsStreamUrl String?
-  srsStreamId  String?
+  publish      Boolean
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime
@@ -62,9 +50,9 @@ model Live {
 model LiveRoom {
   id        String          @id @default(auto()) @map("_id") @db.ObjectId
   name      String?
-  status    LiveRoomStatus?
+  status    LiveRoomStatus  @default(NORMAL)
   isShow    Boolean?
-  rmtpUrl   String?
+  pushUrl   String?
   flvUrl    String?
   hlsUrl    String?
   createdAt DateTime        @default(now())

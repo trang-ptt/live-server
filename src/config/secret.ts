@@ -16,7 +16,7 @@ export const SRS_CONFIG = {
 };
 
 export const SERVER_LIVE = {
-  PushDomain: `rtmp://${LOCALHOST_URL}` || '**********',
+  PushDomain: `webrtc://${LOCALHOST_URL}` || '**********',
   PullDomain:
     `http://${LOCALHOST_URL}:${SRS_CONFIG.docker.port['8080']}` || '**********',
   AppName: 'livestream',
