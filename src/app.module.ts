@@ -7,6 +7,7 @@ import { LiveModule } from './modules/live/live.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SrsModule } from './modules/srs/srs.module';
 import { LiveRoomModule } from './modules/live-room/live-room.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { LiveRoomModule } from './modules/live-room/live-room.module';
     SrsModule,
     LiveRoomModule,
     LiveModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

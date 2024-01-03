@@ -118,4 +118,15 @@ export class LiveRoomService {
       updateLiveRoom,
     };
   }
+
+  async findByUsername(username: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
+
+    const live = await this.findByUserId(user.id);
+    return live;
+  }
 }

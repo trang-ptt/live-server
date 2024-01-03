@@ -48,4 +48,10 @@ export class LiveRoomController {
     const result = this.liveRoomService.create(user, dto.name);
     return result;
   }
+
+  @Get('find/:username')
+  findByUsername(@Param('username') username: string) {
+    const result = this.liveRoomService.findByUsername(username)
+    return result
+  }
 }
