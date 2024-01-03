@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { SERVER_LIVE } from 'src/config/secret';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -10,7 +10,7 @@ export class LiveRoomService {
   async getList() {
     const result = await this.prisma.liveRoom.findMany({
       where: {
-        deletedAt: null,
+        deletedAt: new Date(0),
       },
       select: {
         id: true,
@@ -61,7 +61,7 @@ export class LiveRoomService {
     const result = await this.prisma.liveRoom.findFirst({
       where: {
         userId,
-        deletedAt: null,
+        deletedAt: new Date(0),
       },
     });
     return result;
@@ -69,12 +69,27 @@ export class LiveRoomService {
 
   async create(user: User, name: string) {
     const existed = await this.findByUserId(user.id);
-    if (existed) throw new ForbiddenException('Live room existed');
+    if (existed) {
+      const updateName = await this.prisma.liveRoom.update({
+        where: {
+          id: existed.id,
+        },
+        data: {
+          name,
+        },
+      });
+      return {
+        code: 'SUCCESS',
+        message: 'Room existed',
+        updateName,
+      };
+    }
 
     const liveRoom = await this.prisma.liveRoom.create({
       data: {
         name,
-        deletedAt: null,
+        isShow: false,
+        deletedAt: new Date(0),
         userId: user.id,
       },
     });
@@ -97,6 +112,10 @@ export class LiveRoomService {
         hlsUrl,
       },
     });
-    return updateLiveRoom
+    return {
+      code: 'SUCCESS',
+      message: 'Room created',
+      updateLiveRoom,
+    };
   }
 }

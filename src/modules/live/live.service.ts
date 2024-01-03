@@ -9,7 +9,7 @@ export class LiveService {
   async getList(roomId: string) {
     const result = await this.prisma.live.findMany({
       where: {
-        deletedAt: null,
+        deletedAt: new Date(0),
         liveRoomId: roomId,
       },
       select: {
@@ -33,7 +33,7 @@ export class LiveService {
     const result = await this.prisma.liveRoom.findFirst({
       where: {
         userId,
-        deletedAt: null,
+        deletedAt: new Date(0),
       },
     });
     return result;

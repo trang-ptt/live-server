@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { SRS_CONFIG } from 'src/config/secret';
 import { getIpAddress } from 'src/utils';
@@ -77,7 +77,7 @@ export class SrsController {
   @Post('onPublish')
   async onPublish(@GetUser() user: User, @Body() dto: SrsClientDTO) {
     try {
-      await this.srsService.onPublish(user, dto);
+      return await this.srsService.onPublish(user, dto);
     } catch (error) {
       throw error;
     }

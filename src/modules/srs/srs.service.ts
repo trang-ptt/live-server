@@ -46,22 +46,35 @@ export class SrsService {
     const liveRoom = await this.liveRoomService.find(roomId);
     if (!liveRoom) throw new ForbiddenException('Room not exist');
 
-    const newLive = await this.prisma.live.create({
-      data: {
-        liveRoomId: roomId,
-        userId: user.id,
-        srsClientId: dto.clientId,
-        publish: true,
-        deletedAt: null,
-      },
-    });
-    return newLive;
+    const [newLive, updateLiveRoom] = await Promise.all([
+      this.prisma.live.create({
+        data: {
+          liveRoomId: roomId,
+          userId: user.id,
+          srsClientId: dto.clientId,
+          publish: true,
+          deletedAt: new Date(0),
+        },
+      }),
+      this.prisma.liveRoom.update({
+        where: {
+          id: liveRoom.id,
+        },
+        data: {
+          isShow: true,
+        },
+      }),
+    ]);
+    return {
+      newLive,
+      updateLiveRoom,
+    };
   }
 
   async onUnpublish(user: User, roomId: string) {
     const liveRoom = await this.liveRoomService.find(roomId);
     if (!liveRoom) throw new ForbiddenException('Room not exist');
-  
+
     const isLive = await this.liveService.findPublishLiveByRoomId(roomId);
     if (!isLive) {
       throw new ForbiddenException('Cannot unpublish, no live exist');
@@ -93,7 +106,7 @@ export class SrsService {
         userId: user.id,
         srsClientId: dto.clientId,
         publish: true,
-        deletedAt: null,
+        deletedAt: new Date(0),
       },
     });
     return newLive;
