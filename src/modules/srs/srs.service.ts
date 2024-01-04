@@ -62,6 +62,7 @@ export class SrsService {
         },
         data: {
           isShow: true,
+          name: dto.name,
         },
       }),
     ]);
