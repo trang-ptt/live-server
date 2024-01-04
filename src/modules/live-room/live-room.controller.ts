@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
-import { CreateLiveRoomDTO } from './dto/live-room.dto';
-import { LiveRoomService } from './live-room.service';
 import { JwtGuard } from '../auth/guard';
+import { LiveRoomService } from './live-room.service';
 
 @ApiTags('Live Room')
 @ApiBearerAuth()
@@ -44,14 +43,14 @@ export class LiveRoomController {
     summary: 'Create live room',
   })
   @Post('create')
-  create(@GetUser() user: User, @Body() dto: CreateLiveRoomDTO) {
-    const result = this.liveRoomService.create(user, dto.name);
+  create(@GetUser() user: User) {
+    const result = this.liveRoomService.create(user);
     return result;
   }
 
   @Get('find/:username')
   findByUsername(@Param('username') username: string) {
-    const result = this.liveRoomService.findByUsername(username)
-    return result
+    const result = this.liveRoomService.findByUsername(username);
+    return result;
   }
 }

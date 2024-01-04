@@ -39,6 +39,10 @@ export class SrsRTCBodyDTO {
 export class SrsClientDTO {
   @ApiProperty()
   liveRoomId: string;
+
   @ApiProperty()
   clientId: string;
+
+  @ApiProperty()
+  name: string;
 }

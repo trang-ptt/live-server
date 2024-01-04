@@ -67,27 +67,18 @@ export class LiveRoomService {
     return result;
   }
 
-  async create(user: User, name: string) {
+  async create(user: User) {
     const existed = await this.findByUserId(user.id);
     if (existed) {
-      const updateName = await this.prisma.liveRoom.update({
-        where: {
-          id: existed.id,
-        },
-        data: {
-          name,
-        },
-      });
       return {
         code: 'SUCCESS',
         message: 'Room existed',
-        updateName,
+        liveRoom: existed,
       };
     }
 
     const liveRoom = await this.prisma.liveRoom.create({
       data: {
-        name,
         isShow: false,
         deletedAt: new Date(0),
         userId: user.id,
@@ -115,7 +106,7 @@ export class LiveRoomService {
     return {
       code: 'SUCCESS',
       message: 'Room created',
-      updateLiveRoom,
+      liveRoom: updateLiveRoom,
     };
   }
 
