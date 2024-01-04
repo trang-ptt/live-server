@@ -48,7 +48,7 @@ export class LiveRoomController {
     return result;
   }
 
-  @Get('find/:username')
+  @Get('user/:username')
   findByUsername(@Param('username') username: string) {
     const result = this.liveRoomService.findByUsername(username);
     return result;

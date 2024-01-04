@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { SERVER_LIVE } from 'src/config/secret';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -63,7 +63,7 @@ export class LiveRoomService {
       where: {
         userId,
         deletedAt: new Date(0),
-        isShow: true
+        isShow: true,
       },
     });
     return result;
@@ -118,6 +118,7 @@ export class LiveRoomService {
         username,
       },
     });
+    if (!user) throw new NotFoundException('User not found');
 
     const live = await this.findByUserId(user.id);
     return live;
