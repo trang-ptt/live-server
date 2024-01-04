@@ -5,6 +5,7 @@ import { LOCALHOST_URL } from 'src/constants';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { myaxios } from 'src/utils/request';
 import { LiveRoomService } from '../live-room/live-room.service';
+import { LiveSocketGateway } from '../live-socket/live-socket.gateway';
 import { LiveService } from '../live/live.service';
 import { SrsClientDTO } from './dto';
 import { IApiV1Clients, IApiV1Streams } from './interfaces';
@@ -15,6 +16,7 @@ export class SrsService {
     private prisma: PrismaService,
     private liveRoomService: LiveRoomService,
     private liveService: LiveService,
+    private socket: LiveSocketGateway,
   ) {}
   common = {
     getApiV1ClientDetail: (clientId: string) =>
@@ -90,6 +92,9 @@ export class SrsService {
     });
 
     await this.liveService.deleteLiveByRoomId(roomId);
+    this.socket.server.emit('liveEnd', {
+      roomId,
+    });
     return {
       code: 'SUCCESS',
     };
@@ -110,6 +115,13 @@ export class SrsService {
         deletedAt: new Date(0),
       },
     });
+
+    const viewers = await this.countView(roomId);
+    this.socket.server.emit('userConnected', {
+      roomId,
+      username: user.username,
+      viewers,
+    });
     return newLive;
   }
 
@@ -129,8 +141,24 @@ export class SrsService {
       }),
     ]);
 
+    const viewers = await this.countView(roomId);
+    this.socket.server.emit('userDisconnected', {
+      roomId,
+      username: user.username,
+      viewers,
+    });
+
     return {
       code: 'SUCCESS',
     };
+  }
+
+  async countView(roomId: string): Promise<number> {
+    const viewers = await this.prisma.live.count({
+      where: {
+        liveRoomId: roomId,
+      },
+    });
+    return viewers - 1;
   }
 }

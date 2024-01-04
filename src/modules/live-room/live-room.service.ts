@@ -11,6 +11,7 @@ export class LiveRoomService {
     const result = await this.prisma.liveRoom.findMany({
       where: {
         deletedAt: new Date(0),
+        isShow: true,
       },
       select: {
         id: true,
@@ -62,6 +63,7 @@ export class LiveRoomService {
       where: {
         userId,
         deletedAt: new Date(0),
+        isShow: true
       },
     });
     return result;
