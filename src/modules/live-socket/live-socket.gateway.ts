@@ -12,7 +12,11 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from '../auth/auth.service';
 import { LiveCommentDTO, LiveLikeDTO } from './dto';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+  },
+})
 export class LiveSocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit
 {
