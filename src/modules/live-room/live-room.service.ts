@@ -72,11 +72,27 @@ export class LiveRoomService {
   async create(user: User) {
     const existed = await this.findByUserId(user.id);
     if (existed) {
-      return {
-        code: 'SUCCESS',
-        message: 'Room existed',
-        liveRoom: existed,
-      };
+      if (!existed.isShow) {
+        return {
+          code: 'SUCCESS',
+          message: 'Room existed',
+          liveRoom: existed,
+        };
+      }
+      const { id } = existed;
+
+      await Promise.all([
+        this.prisma.live.deleteMany({
+          where: {
+            liveRoomId: id,
+          },
+        }),
+        this.prisma.liveRoom.delete({
+          where: {
+            id,
+          },
+        }),
+      ]);
     }
 
     const liveRoom = await this.prisma.liveRoom.create({
@@ -117,10 +133,19 @@ export class LiveRoomService {
       where: {
         username,
       },
+      select: {
+        id: true,
+        username: true,
+        ava: true,
+      },
     });
     if (!user) throw new NotFoundException('User not found');
 
     const live = await this.findByUserId(user.id);
-    return live;
+    if (!live) throw new NotFoundException('Live not found');
+    return {
+      ...live,
+      user,
+    };
   }
 }
