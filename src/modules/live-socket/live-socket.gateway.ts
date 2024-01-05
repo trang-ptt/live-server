@@ -99,7 +99,7 @@ export class LiveSocketGateway
     const user: User = await client.data.user;
     const { react, roomId } = payload;
 
-    this.server.to(roomId).emit('onReact', {
+    this.server.emit('onReact', {
       roomId,
       userId: user.id,
       username: user.username,
